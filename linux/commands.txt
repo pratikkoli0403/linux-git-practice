@@ -1,0 +1,12 @@
+pwd
+ls
+cd
+mkdir
+rm
+cp
+mv
+chmod
+nano
+apt install
+ps
+kill
