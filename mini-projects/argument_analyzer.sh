@@ -5,13 +5,16 @@ arg=$1
 length=${#arg}
 
 if [ $length -ge 5 ]; then
-echo "$arg length $length valid"
+echo "arg: $arg | length: $length | valid"
+return 0
 else
-echo "$arg length $length invalid"
+echo "arg: $arg | length: $length | invalid"
+return 1
 fi
 }
 
 main(){
+#Error 1: no arguents
 if [ $# -eq 0 ]; then
 echo "Give at least one argument"
 exit 1
@@ -23,6 +26,12 @@ do
 analyze_arg "$arg" || invalid_found=1
 done
 echo "Total argument:$#"
-[ $invalid_found -eq 1 ] && exit 2 ||exit 0
+#Error 2: invalif argument detected
+if [ $invalid_found -eq 1 ]; then
+exit 2
+else 
+exit 0
+fi
 }
+
 main "$@"
