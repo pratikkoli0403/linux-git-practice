@@ -1,0 +1,6 @@
+INFO Application started
+WARNING Low memory
+INFO Processing request
+ERROR Failed to connect database
+INFO Retrying
+WARNING Disk almost full
