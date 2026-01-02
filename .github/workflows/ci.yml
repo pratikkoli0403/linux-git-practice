@@ -13,9 +13,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run app script
+      - name: Build Docker image
         run: |
-          chmod +x app.sh
-          ./app.sh
+          docker build -t ci-docker-test .
 
 
