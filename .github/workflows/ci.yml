@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  ssh-test:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,8 +20,33 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Test SSH connection
+      - name: Deploy Docker app on EC2
         run: |
-          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "echo SSH_CONNECTION_SUCCESS"
+          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            set -e
 
+            docker stop app || true
+            docker rm app || true
 
+            rm -rf app-deploy
+            mkdir app-deploy
+            cd app-deploy
+
+            cat > app.sh << 'SCRIPT'
+            #!/bin/bash
+            echo "CI/CD deployment successful"
+            SCRIPT
+
+            chmod +x app.sh
+
+            cat > Dockerfile << 'DOCKER'
+            FROM ubuntu:22.04
+            WORKDIR /app
+            COPY app.sh .
+            RUN chmod +x app.sh
+            CMD ["./app.sh"]
+            DOCKER
+
+            docker build -t app-image .
+            docker run -d --name app -p 80:80 app-image
+          EOF
