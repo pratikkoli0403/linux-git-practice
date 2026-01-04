@@ -22,14 +22,17 @@ jobs:
 
       - name: Deploy app to EC2
         run: |
+          rsync -avz --delete \
+            --exclude '.git' \
+            ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ubuntu/app
+
           ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << EOF
-            echo "Starting deployment on EC2"
+            cd /home/ubuntu/app
 
             docker stop web || true
             docker rm web || true
+            docker rmi site-image || true
 
-            echo "Running nginx container"
-            docker run -d --name web -p 80:80 nginx
-
-            echo "Deployment finished"
+            docker build -t site-image .
+            docker run -d --name web -p 80:80 site-image
           EOF
