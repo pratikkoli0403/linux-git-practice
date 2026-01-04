@@ -25,28 +25,24 @@ jobs:
           ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
             set -e
 
-            docker stop app || true
-            docker rm app || true
+            docker stop web || true
+            docker rm web || true
 
-            rm -rf app-deploy
-            mkdir app-deploy
-            cd app-deploy
+            docker run -d \
+              --name web \
+              -p 80:80 \
+              nginx
+          EOF
+      - name: Deploy Docker app on EC2
+        run: |
+          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            set -e
 
-            cat > app.sh << 'SCRIPT'
-            #!/bin/bash
-            echo "CI/CD deployment successful"
-            SCRIPT
+            docker stop web || true
+            docker rm web || true
 
-            chmod +x app.sh
-
-            cat > Dockerfile << 'DOCKER'
-            FROM ubuntu:22.04
-            WORKDIR /app
-            COPY app.sh .
-            RUN chmod +x app.sh
-            CMD ["./app.sh"]
-            DOCKER
-
-            docker build -t app-image .
-            docker run -d --name app -p 80:80 app-image
+            docker run -d \
+              --name web \
+              -p 80:80 \
+              nginx
           EOF
