@@ -20,19 +20,37 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy app to EC2
+      - name: Deploy app from repo to EC2
         run: |
-          rsync -avz --delete \
-            --exclude '.git' \
-            ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ubuntu/app
-
           ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << EOF
-            cd /home/ubuntu/app
+            set -x
 
             docker stop web || true
             docker rm web || true
             docker rmi site-image || true
 
+            rm -rf /home/ubuntu/app
+            mkdir -p /home/ubuntu/app/site
+
+            cat > /home/ubuntu/app/Dockerfile << 'DOCKER'
+            FROM nginx:alpine
+            COPY site /usr/share/nginx/html
+            DOCKER
+
+            cat > /home/ubuntu/app/site/index.html << 'HTML'
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <title>CI/CD Project</title>
+            </head>
+            <body>
+              <h1>Deployed from GitHub Repo</h1>
+              <p>Automated using GitHub Actions + Docker + EC2</p>
+            </body>
+            </html>
+            HTML
+
+            cd /home/ubuntu/app
             docker build -t site-image .
             docker run -d --name web -p 80:80 site-image
           EOF
