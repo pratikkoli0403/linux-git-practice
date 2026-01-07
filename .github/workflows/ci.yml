@@ -16,7 +16,7 @@ jobs:
        run: docker build -t day3-image .
 
       -name: Run container
-       run: docker run -d --name day3-test day3-image
+       run: docker run --rm day3-image
 
       -name: Check container status
        run: docker ps -a
