@@ -1,3 +1,6 @@
-FROM nginx:alpine
+FROM ubuntu:22.04
 
-COPY site /usr/share/nginx/html
+COPY test.sh /test.sh
+RUN chmod +x /test.sh
+
+CMD ["/test.sh"]

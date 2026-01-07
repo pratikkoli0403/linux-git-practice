@@ -1,3 +1,5 @@
 #!/bin/bash
-echo "CI containers started "
-exit 0
+while true
+do
+  sleep 10
+done
