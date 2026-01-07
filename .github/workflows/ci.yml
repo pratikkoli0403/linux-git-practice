@@ -2,21 +2,19 @@ name: Docker CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
   build:
-    runs-on: ubunt-latest
+    runs-on: ubuntu-latest
 
     steps:
-      -name: Checkout code
-       uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      -name: Build Docker image
-       run: docker build -t day3-image .
+      - name: Build Docker image
+        run: docker build -t day3-image .
 
-      -name: Run container
-       run: docker run --rm day3-image
-
-      -name: Check container status
-       run: docker ps -a
+      - name: Run container
+        run: docker run --rm day3-image
