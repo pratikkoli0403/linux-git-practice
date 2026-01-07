@@ -1,11 +1,3 @@
-FROM ubuntu:22.04
+FROM nginx:alpine
 
-WORKDIR /app
-
-COPY app.sh .
-
-RUN chmod +x app.sh
-
-CMD ["./app.sh"]
-
-
+COPY site /usr/share/nginx/html
