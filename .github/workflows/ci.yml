@@ -1,4 +1,4 @@
-name: Docker CI
+name: CI-CD to EC2
 
 on:
   push:
@@ -6,15 +6,46 @@ on:
       - main
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build Docker image
-        run: docker build --no-cache -t day3-image .
+      - name: Prepare SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/ec2_key
+          chmod 600 ~/.ssh/ec2_key
 
-      - name: Run container
-        run: docker run --rm day3-image
+      - name: Deploy on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+          -i ~/.ssh/ec2_key \
+          ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            set -e
+            cd ~/cd-app || mkdir -p ~/cd-app && cd ~/cd-app
+            rm -rf *
+            exit
+          EOF
+
+      - name: Copy files to EC2
+        run: |
+          scp -o StrictHostKeyChecking=no \
+          -i ~/.ssh/ec2_key \
+          -r ./* \
+          ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:~/cd-app
+
+      - name: Build & Run on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+          -i ~/.ssh/ec2_key \
+          ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            set -e
+            cd ~/cd-app
+            docker stop cd-app || true
+            docker rm cd-app || true
+            docker build -t cd-app .
+            docker run -d --name cd-app cd-app
+          EOF
