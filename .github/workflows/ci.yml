@@ -46,5 +46,5 @@ jobs:
             docker stop cd-app || true
             docker rm cd-app || true
             docker build -t cd-app .
-            docker run -d --name cd-app cd-app
+            docker run -d --name cd-app -p 80:80 cd-app
           EOF
