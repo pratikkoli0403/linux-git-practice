@@ -1,5 +1,6 @@
 #!/bin/bash
-while true
-do
-  sleep 10
-done
+set -e
+
+echo "CI container started"
+echo "CI container finished"
+exit 0
