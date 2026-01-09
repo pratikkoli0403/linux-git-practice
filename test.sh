@@ -1,6 +1,6 @@
 #!/bin/bash
-set -e
-
-echo "CI container started"
-echo "CI container finished"
-exit 0
+echo "App started on EC2"
+while true
+do
+  sleep 60
+done
